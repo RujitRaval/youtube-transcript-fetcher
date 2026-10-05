@@ -25,6 +25,10 @@
 - launchd plist rendered with absolute paths and checked using `plutil -lint`: passed.
 - systemd service/timer rendered and checked by unit tests for substitutions and
   persistence settings. Not executed under a Linux systemd manager.
+- GitHub Actions [run 37354725723](https://github.com/RujitRaval/youtube-transcript-fetcher/actions/runs/37354725723)
+  passed all eight Linux/macOS jobs across Python 3.11–3.14 for commit `a142e1e`.
+  Each job installed the core/dev dependencies, checked formatting and lint,
+  ran the offline tests, and built the package.
 
 ## Live YouTube checks (separate from the test suite)
 
@@ -71,8 +75,8 @@ are covered with mocked upstream responses; the live checks above used manual ca
 
 - No scheduler was registered, no machine reboot was performed, and no unattended
   multi-day collection was observed. launchd syntax is validated, not reboot behavior.
-- Linux execution and Python 3.11/3.13/3.14 are represented in the CI matrix but have
-  not been run locally. The current branch still requires its GitHub Actions checks.
+- Optional model inference on Linux or Python 3.11/3.13/3.14 has not been exercised;
+  the CI matrix covers the core application and mocked speaker tests.
 - Audio diarization does not transcribe new words; it aligns voice labels to existing captions.
 - Speaker accuracy has not been scored against a human-labeled reference dataset.
 

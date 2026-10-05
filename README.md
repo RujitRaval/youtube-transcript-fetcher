@@ -427,7 +427,8 @@ Do not install both cron and a native timer for the same collector.
   configured tab. Uploads older than that window can be missed. Increase the limit
   temporarily (maximum 1000) or collect known video URLs. This is not a full archive.
 - Caption quality, language tags, rolling repetition, metadata availability and
-  upstream access cannot be guaranteed. No speaker diarization or summaries.
+  upstream access cannot be guaranteed. Speaker labeling requires explicit local
+  analysis and human review; summaries are not included.
 - Linux/macOS only in V1. Scheduled jobs need the computer awake and the appropriate
   account session/user manager running. Scheduler installation is explicit.
 - Use transcripts in accordance with applicable rights and YouTube's terms. The MIT
@@ -452,6 +453,7 @@ src/youtube_transcript_collector/
   cli.py, config.py, collector.py, database.py, models.py, retry.py, utils.py
   youtube/          # bounded discovery + both caption providers
   output/           # atomic storage, Markdown, VTT
+  speakers/         # optional local diarization, review, edits, and exports
   transcription/    # future local backend protocol only
 tests/              # deterministic offline tests
 scripts/            # scheduler renderer
@@ -461,10 +463,10 @@ docs/               # plan, decisions, validation
 
 [Architecture decisions and upstream research](docs/architecture.md) explain the
 tradeoffs. The project uses MIT; youtube-transcript-api is MIT and the yt-dlp PyPI
-package is Unlicense. Dependency licenses still apply. See [CONTRIBUTING.md](CONTRIBUTING.md)
-and [SECURITY.md](SECURITY.md).
+package is Unlicense. Dependency licenses still apply. See [CONTRIBUTING.md](CONTRIBUTING.md),
+[SECURITY.md](SECURITY.md), and [CHANGELOG.md](CHANGELOG.md).
 
 Reasonable V2 work: an opt-in faster-whisper/whisper.cpp backend after caption retry
 exhaustion, a lightweight health notification, SQLite full-text search over saved
-segments, and improved gap/backfill discovery. Diarization, embeddings, summaries,
-and a UI should remain separate optional additions.
+segments, and improved gap/backfill discovery. Embeddings, summaries,
+and a broader UI should remain separate optional additions.
