@@ -88,11 +88,11 @@
 - `speakers refine` uses the current run's verified PCM16 audio. It clips a temporary
   analysis section at the nearest audio frame and invokes the existing backend
   with an explicit count. No audio download is attempted.
-- Turns before the boundary retain their cluster IDs; crossing turns are clipped.
-  Later clusters use a distinct namespace, then all IDs are normalized by first
-  occurrence. Whole earlier caption assignments are retained; boundary and later
-  cues are aligned against the combined turns. This does not match a person
-  across the boundary.
+- Turns before the boundary retain their cluster and speaker IDs; crossing turns
+  are clipped. Later voices receive distinct IDs after the earlier speakers,
+  ordered by first occurrence. Whole earlier caption assignments are retained;
+  boundary and later cues are aligned against the combined turns. This does not
+  match a person across the boundary.
 - New runs record parent run/revision and accumulated human constraints. Names and
   manual corrections start fresh; all previous edits remain in their parent run.
   Full audio and original caption text/timestamps are preserved.
