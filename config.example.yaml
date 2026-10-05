@@ -1,0 +1,26 @@
+# Relative paths are relative to this file, even when run by a scheduler.
+storage:
+  output_directory: ./transcripts
+  database: ./data/collector.db
+
+collector:
+  recent_video_limit: 10
+  max_videos_per_run: 20
+  request_delay_seconds: 2
+  network_timeout_seconds: 20
+
+transcripts:
+  preferred_languages: [en, en-orig]
+  retry:
+    max_attempts: 6
+    backoff_hours: [1, 3, 12, 24, 48]
+    rate_limit_cooldown_hours: 6
+
+local_transcription:
+  enabled: false # Backend interface only in V1; true is not yet supported.
+
+channels:
+  - name: creator-one
+    url: https://www.youtube.com/@creator-one
+  - name: creator-two
+    url: https://www.youtube.com/@creator-two

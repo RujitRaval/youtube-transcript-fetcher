@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.youtube-transcript-collector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>@@PYTHON@@</string><string>-m</string><string>youtube_transcript_collector</string>
+    <string>--config</string><string>@@CONFIG@@</string>
+    <string>--log-file</string><string>@@LOG@@</string><string>run</string>
+  </array>
+  <key>WorkingDirectory</key><string>@@PROJECT@@</string>
+  <key>RunAtLoad</key><true/>
+  <key>StartInterval</key><integer>3600</integer>
+  <key>ProcessType</key><string>Background</string>
+  <key>Umask</key><integer>63</integer>
+</dict>
+</plist>
