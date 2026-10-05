@@ -1,0 +1,6 @@
+# Single-video collection and speaker review; no channel subscriptions.
+# Paths resolve relative to this configuration file.
+storage:
+  output_directory: ./transcripts
+  database: ./data/collector.db
+channels: []

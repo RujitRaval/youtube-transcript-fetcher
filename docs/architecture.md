@@ -82,3 +82,19 @@
 - Audio range requests support timestamp seeking. Playback/export links are bound to
   the loaded run ID. Exports use current saved names while preserving original model
   evidence and edit history in JSON. No identity inference, cloud service, or telemetry.
+
+## Refining speaker sections (0.3.0)
+
+- `speakers refine` uses the current run's verified PCM16 audio. It clips a temporary
+  analysis section at the nearest audio frame and invokes the existing backend
+  with an explicit count. No audio download is attempted.
+- Turns before the boundary retain their cluster IDs; crossing turns are clipped.
+  Later clusters use a distinct namespace, then all IDs are normalized by first
+  occurrence. Whole earlier caption assignments are retained; boundary and later
+  cues are aligned against the combined turns. This does not match a person
+  across the boundary.
+- New runs record parent run/revision and accumulated human constraints. Names and
+  manual corrections start fresh; all previous edits remain in their parent run.
+  Full audio and original caption text/timestamps are preserved.
+- Analysis, copy verification, run data and exports finish before the atomic
+  current pointer changes. Any failure retains the previous current run.

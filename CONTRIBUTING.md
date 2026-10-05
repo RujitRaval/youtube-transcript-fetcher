@@ -21,3 +21,10 @@ URLs, or logs. See docs/architecture.md for design decisions.
 Open a focused issue/PR describing the problem, final behavior, and test results.
 External YouTube changes should be reproduced separately from deterministic tests;
 include Python/library versions and redacted error kinds, never authentication data.
+
+Speaker tests use small PCM fixtures and mocked inference, so `.[dev]` is enough
+for the offline suite. For manual model verification, install `.[dev,speakers]`,
+run `speakers setup`, and follow the README single-video workflow. Use an isolated
+config/output/database when testing refinement so personal names and corrections
+are not replaced by a fresh analysis. Audio, models and private review data stay
+out of Git. New CLI behavior should have offline failure/preservation tests.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 — 2026-10-05
+
+- Refine the audio after a chosen timestamp with a known speaker count while retaining earlier model labels.
+- Reuse saved audio locally, preserve previous runs and edits, and record the constraint and parent run in audit exports.
+- Add a single-video example configuration, complete speaker quick start, and troubleshooting instructions.
+
 ## 0.2.0 — 2026-10-05
 
 - Optionally label recurring voices as Speaker 1, Speaker 2, and so on using local audio analysis.
