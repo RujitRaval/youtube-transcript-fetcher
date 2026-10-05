@@ -38,6 +38,14 @@ def register(commands):
     sub = speakers.add_subparsers(dest="speaker_command", required=True)
     setup = sub.add_parser("setup", help="Download checksum-verified public speaker models")
     setup.add_argument("--models-dir", type=Path)
+    refine = sub.add_parser(
+        "refine", help="Reanalyze saved audio after a boundary with a known voice count"
+    )
+    refine.add_argument("video_url")
+    refine.add_argument("--from-seconds", type=float, required=True)
+    refine.add_argument("--num-speakers", type=int, required=True)
+    refine.add_argument("--models-dir", type=Path)
+    refine.add_argument("--threads", type=int, default=2)
     review = sub.add_parser("review", help="Open a localhost review page with durable saved edits")
     review.add_argument("video_url")
     review.add_argument("--port", type=int, default=8766)
@@ -81,6 +89,26 @@ def execute(args, config):
             f"speakers review {identifier}"
         )
         logging.info("Speaker run %s saved for %s", base["run_id"], identifier)
+        return 0
+    if args.speaker_command == "refine":
+        from .refine import refine_run
+
+        models = (
+            (args.models_dir or config.database.parent / "speaker-models").expanduser().resolve()
+        )
+        directory, base, state = refine_run(
+            config,
+            video_id(args.video_url),
+            start_seconds=args.from_seconds,
+            num_speakers=args.num_speakers,
+            models=models,
+            threads=args.threads,
+        )
+        print(f"Saved {len(state['names'])} voice clusters: {directory}")
+        print(
+            f"Previous run retained: {base['parent_run_id']}; new names and corrections start blank"
+        )
+        print("Reload the review page to use this run. Exports are saved in the run directory.")
         return 0
     bundle = store.bundle_for(config, video_id(args.video_url))
     if args.speaker_command == "review":

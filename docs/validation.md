@@ -13,7 +13,7 @@
 
 - `ruff format --check .`: passed.
 - `ruff check .`: passed.
-- `pytest -q`: **110 passed**, with socket connections blocked by the test fixture.
+- `pytest -q`: **140 passed**, with socket connections blocked by the test fixture.
 - Source distribution and wheel build: passed. Wheel has the console entry point;
   source archive includes README, example config, scheduler renderer and templates.
   Build artifacts exclude local state, transcripts and virtualenv.
@@ -70,6 +70,27 @@ are covered with mocked upstream responses; the live checks above used manual ca
 - `node --check` passed for the review script; the built wheel includes its HTML,
   CSS and JavaScript resources. Audio, models, transcripts and local edits remain
   ignored by Git.
+
+## Section refinement (v0.3.0)
+
+- Added 30 offline tests covering exact PCM frame cropping, unchanged earlier
+  assignments, stable IDs for overlapping turns, distinct later voices, preserved
+  parent edits, provenance, exports, CLI arguments and failed-run recovery.
+- The supported `speakers refine` CLI ran on an isolated copy of the full
+  `SfOaZIGJ_gs` recording with `--from-seconds 43 --num-speakers 2`. Inference took
+  **257.49 seconds**. Its turns and all **825 caption entries** exactly matched the
+  previously reviewed correction: **four speakers overall**, only Speaker 3/4
+  after 00:43, and **24 captions flagged for review**. This is reproduction of a
+  reviewed result, not a measured speaker-accuracy score.
+- The user's active review run, names and edits were not modified by the release
+  verification. All live artifacts remain in ignored local directories.
+- Created a new Python 3.12 virtualenv with standard `python -m venv`, installed
+  the source archive with `pip install -e '.[speakers]'`, copied the packaged manual
+  example config, and verified doctor, refinement help, model checksums, native
+  imports, bundled FFmpeg and packaged review assets.
+- Ruff formatting/lint, all 140 offline tests, source distribution and wheel builds
+  pass. The existing CI matrix verifies core/offline behavior on Linux and macOS;
+  the live optional native backend verification remains macOS Apple Silicon only.
 
 ## Not claimed as tested
 
