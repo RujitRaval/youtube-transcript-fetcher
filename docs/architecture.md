@@ -14,7 +14,8 @@
 
 ## Decisions
 
-- One synchronous process per cycle; no server, worker queue, threads, or daemon.
+- One synchronous process per caption cycle; no worker queue or daemon. The explicit
+  speaker review command starts a separate localhost HTTP server.
 - SQLite `video_id` primary key is the deduplication boundary. A Unix advisory lock
   adjacent to the DB serializes mutating commands; a crashed process releases it.
 - Store each file atomically and write metadata last as a checksum manifest. Recovery
@@ -33,7 +34,8 @@
 - Metadata enrichment is best effort and does not prevent saving available captions.
   Unknown publication dates remain null and use an `unknown-date` folder.
 - Local transcription is only a Python protocol seam in V1. Configuration requesting
-  it is rejected with a clear explanation; no backend/audio downloader ships yet.
+  it is rejected with a clear explanation. Optional speaker diarization analyzes audio
+  without transcribing words and does not use this setting.
 - Native Python packaging is the default. uv is an optional faster venv/pip substitute,
   not a runtime dependency. No automatic dependency updates in unattended runs.
 - Linux/macOS are supported; native Windows scheduling/locking is outside V1.
@@ -47,7 +49,8 @@
 - [yt-dlp embedding/options](https://github.com/yt-dlp/yt-dlp):
   `YoutubeDL.extract_info(download=False)`, `extract_flat`, `playlistend`,
   `subtitles` / `automatic_captions`; retrieve selected JSON3/VTT via `urlopen`.
-  `skip_download=True` everywhere; no media downloader or ffmpeg is needed.
+  `skip_download=True` in caption collection; no media downloader or ffmpeg is needed
+  for that path. Explicit speaker analysis uses audio-only download and local FFmpeg.
   PyPI source/wheel are [Unlicense](https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE),
   unlike bundled standalone binaries which can incorporate GPL code. We depend on
   the Python package, not those binaries. PyYAML is MIT; requests is Apache-2.0.
@@ -60,3 +63,22 @@
   possible; provide actionable logs and dependency-upgrade instructions.
 - [uv environments](https://docs.astral.sh/uv/pip/environments/) supports the same
   ordinary virtualenv model and speeds setup without changing the architecture.
+
+## Speaker analysis (0.2.0)
+
+- Explicit `diarize` command; default runs/schedulers never download audio or models.
+- Optional dependencies are imported lazily. Setup downloads pinned, checksum-verified
+  public model assets. Extraction reads only named regular files from the archive.
+- Diarization generates anonymous voice clusters, numbered by first occurrence.
+  Caption alignment uses interval overlap; mixed cues are flagged without splitting words.
+- Each run stages into a temporary directory and publishes through an atomic current
+  pointer only after model results, playback audio, and initial edits are saved.
+- Names and cue overrides share one atomic edits document with their before/after
+  history. Optimistic run/revision checks reject stale saves. All writes hold the
+  existing collector lock. Caption hashes reject results made against older captions.
+- The review server binds only to 127.0.0.1, serves a fixed route allowlist, validates
+  Host and Origin, and requires an unpredictable per-server edit token. No CORS.
+  User text is rendered through textContent; a restrictive CSP blocks inline scripts.
+- Audio range requests support timestamp seeking. Playback/export links are bound to
+  the loaded run ID. Exports use current saved names while preserving original model
+  evidence and edit history in JSON. No identity inference, cloud service, or telemetry.

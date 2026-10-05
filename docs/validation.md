@@ -13,7 +13,7 @@
 
 - `ruff format --check .`: passed.
 - `ruff check .`: passed.
-- `pytest -q`: **66 passed**, with socket connections blocked by the test fixture.
+- `pytest -q`: **110 passed**, with socket connections blocked by the test fixture.
 - Source distribution and wheel build: passed. Wheel has the console entry point;
   source archive includes README, example config, scheduler renderer and templates.
   Build artifacts exclude local state, transcripts and virtualenv.
@@ -25,6 +25,10 @@
 - launchd plist rendered with absolute paths and checked using `plutil -lint`: passed.
 - systemd service/timer rendered and checked by unit tests for substitutions and
   persistence settings. Not executed under a Linux systemd manager.
+- GitHub Actions [run 37354725723](https://github.com/RujitRaval/youtube-transcript-fetcher/actions/runs/37354725723)
+  passed all eight Linux/macOS jobs across Python 3.11–3.14 for commit `a142e1e`.
+  Each job installed the core/dev dependencies, checked formatting and lint,
+  ran the offline tests, and built the package.
 
 ## Live YouTube checks (separate from the test suite)
 
@@ -46,13 +50,35 @@ that YouTube grants the same access from another network or for other videos.
 Automatic captions, English variants, preferred-language ranking, and fallback VTT
 are covered with mocked upstream responses; the live checks above used manual captions.
 
+## Speaker labeling (v0.2.0)
+
+- Installed the optional `speakers` dependencies, downloaded both pinned models,
+  verified their SHA-256 hashes, and ran the actual CPU pipeline on video
+  `SfOaZIGJ_gs` (Sam Altman x Nikhil Kamath).
+- Processed the full **2,711.011-second** audio, covering **825 captions**.
+  Inference took **256.69 seconds** on this machine. Automatic clustering produced
+  **10 voice clusters**, with **27 captions flagged for review**. These are model
+  groups, not a verified count of people; the same person can appear in multiple
+  groups. No names were inferred.
+- Browser QA on an isolated copy verified global rename, persistence after reload,
+  caption correction, the review filter, audio playback/seek, and audit JSON
+  download. The downloaded file contained both saved revisions with before/after
+  values. Test edits did not modify the user's analysis.
+- Added 44 offline tests for model integrity, alignment, immutable run publication,
+  failure recovery, optimistic edit conflicts, CLI flows, HTTP access controls,
+  audio range requests and exports. Default commands do not import audio packages.
+- `node --check` passed for the review script; the built wheel includes its HTML,
+  CSS and JavaScript resources. Audio, models, transcripts and local edits remain
+  ignored by Git.
+
 ## Not claimed as tested
 
 - No scheduler was registered, no machine reboot was performed, and no unattended
   multi-day collection was observed. launchd syntax is validated, not reboot behavior.
-- Linux execution and Python 3.11/3.13/3.14 are represented in the CI matrix but have
-  not been run locally. GitHub Actions has not been executed for this unpublished tree.
-- No local transcription implementation exists in V1.
+- Optional model inference on Linux or Python 3.11/3.13/3.14 has not been exercised;
+  the CI matrix covers the core application and mocked speaker tests.
+- Audio diarization does not transcribe new words; it aligns voice labels to existing captions.
+- Speaker accuracy has not been scored against a human-labeled reference dataset.
 
 ## Reproduce
 

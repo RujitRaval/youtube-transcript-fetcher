@@ -5,8 +5,10 @@ saves their existing captions as timestamped JSON, readable Markdown, and WebVTT
 Install it once on a family member's computer, configure their channels, and let
 macOS launchd or Linux systemd invoke it roughly hourly. Each invocation exits.
 
-**Local storage. No analytics, telemetry, tracking, automatic uploads, paid APIs,
-API keys, LLMs, account login, or video/audio downloads.** Network access to YouTube
+**The default caption collector uses local storage, with no analytics, telemetry,
+tracking, automatic uploads, paid APIs, API keys, LLMs, account login, or media downloads.**
+Optional speaker labeling explicitly downloads audio and model files and processes
+them locally; see [Speaker labeling](#speaker-labeling-optional). Network access to YouTube
 is necessary; there is no hosted application or third-party transcript service.
 YouTube can see your IP address and requested videos. Caption access depends on
 YouTube and sometimes requires a developer to update the extraction libraries.
@@ -26,10 +28,96 @@ and `en-orig` are supported. Machine-translated subtitle URLs are excluded. An
 explicit rate limit/IP block pauses all YouTube requests rather than trying another
 provider. Ordinary missing captions or provider failures do use the fallback.
 
-There is no daemon loop, web UI, queue service, Docker requirement, or YouTube Data
-API. No local transcription backend is included in V1; the extension interface is
+The caption collector has no daemon loop, queue service, Docker requirement, or
+YouTube Data API. The optional speaker review page runs only on localhost. No speech-to-text backend is included; the extension interface is
 in `transcription/base.py`. Enabling local transcription currently gives a useful
 configuration error instead of silently pretending to transcribe.
+
+## Speaker labeling (optional)
+
+Speaker diarization groups recurring voices as **Speaker 1, Speaker 2, …**.
+You can rename each voice, correct individual caption assignments, and export the
+result with an audit history. Existing captions remain the source of the words;
+this feature does not retranscribe speech or automatically identify real people.
+
+Install optional dependencies and fetch the pinned models once:
+
+```sh
+python -m pip install -e '.[speakers]'
+youtube-transcript-collector speakers setup
+```
+
+Then collect captions and analyze the audio:
+
+```sh
+youtube-transcript-collector collect 'https://www.youtube.com/watch?v=SfOaZIGJ_gs'
+youtube-transcript-collector diarize 'https://www.youtube.com/watch?v=SfOaZIGJ_gs'
+youtube-transcript-collector speakers review SfOaZIGJ_gs --open
+```
+
+The review page opens at `http://127.0.0.1:8766`. Enter names and select **Save
+names** to persist them on disk. Select a timestamp to listen. Expand **Correct
+speaker assignment** to select one or more voices for a caption, then save it.
+The review filter shows ambiguous captions; unflagged predictions can also be wrong.
+Downloads always use the latest saved edits. Press Ctrl+C to stop the review server.
+
+The same name may be assigned to two clusters if the model split one person's
+voice. Their original IDs remain distinct in the audit data. Use **Use model
+prediction** to undo a caption correction while retaining its history.
+
+For an initial sample, add `--sample-seconds 300`. The downloaded source audio can
+still be full length; only the first 300 seconds are analyzed. To process an
+existing local file without contacting YouTube, use `--audio /path/to/audio.wav`.
+The supplied audio must start at video time zero and match the caption timeline.
+Use `--num-speakers 4` only when you know there are exactly four voices, including
+introductions and crew. Otherwise the count is estimated. `--threshold 0.9` is the
+default; larger values merge more voices. Settings require tuning for some recordings.
+
+Command-line renaming and exports also work without the review server:
+
+```sh
+youtube-transcript-collector speakers rename SfOaZIGJ_gs 1 'Nikhil Kamath'
+youtube-transcript-collector speakers export SfOaZIGJ_gs
+```
+
+The name above is an example: listen before assigning it. Speaker numbering follows
+first occurrence in each run and does not identify the same person across videos.
+Global options such as `--config /path/to/config.yaml` come **before** the command.
+
+Each run is saved inside the video's bundle under `speakers/runs/<run-id>/`:
+
+- `audio.wav`: local playback audio, 16 kHz mono; about 115 MB per audio hour.
+- `run.json`: model labels and intervals, source cue indexes and original words,
+  model versions/settings/checksums, audio and caption checksums, creation time,
+  and whether the analysis covers only part of the video.
+- `edits.json`: saved names, caption corrections, revision number, and timestamped
+  before/after edit history. Updates replace this file atomically.
+- `speakers export` writes `transcript.speakers.md`, `.vtt`, and `.json` snapshots
+  into that run directory. Export again after edits to refresh these snapshots;
+  browser downloads are rendered from the latest saved state.
+
+A rerun creates a new directory and fresh names; it never silently reuses an old
+name mapping. Previous runs remain available on disk. Failed analysis leaves the
+previous current run intact. Recollecting changed captions invalidates old speaker
+results until you analyze again. Original caption files and their manifest are untouched.
+The collector lock serializes analysis and edits with caption collection.
+
+**Accuracy:** overlapping speech, short replies, similar voices, music, and edited
+introductions can cause missed or split speakers. Mixed-speaker captions remain
+intact and may show multiple candidates with a review flag. Words are not aligned
+individually, and overlap ratios are not confidence scores. This is an assisted
+review workflow, not a verified record of who said each word.
+
+The backend is [Sherpa-ONNX](https://k2-fsa.github.io/sherpa/onnx/speaker-diarization/models.html),
+with its publicly distributed pyannote segmentation and NeMo TitaNet-S embedding
+models. Setup verifies pinned SHA-256 checksums and preserves the segmentation
+license. No paid API or Hugging Face token is needed for this backend. Models live
+beside the database in `speaker-models/`; `--models-dir` overrides that location
+for both setup and analysis. The optional ImageIO FFmpeg wheel supplies an FFmpeg
+binary and has its own third-party license obligations. Models, media, and private
+transcripts are not distributed in this repository. The live backend has been
+tested on Apple Silicon; core/offline tests run on macOS and Linux. Optional model
+runtime performance on other machines is not guaranteed.
 
 ## Requirements and installation
 
@@ -339,7 +427,8 @@ Do not install both cron and a native timer for the same collector.
   configured tab. Uploads older than that window can be missed. Increase the limit
   temporarily (maximum 1000) or collect known video URLs. This is not a full archive.
 - Caption quality, language tags, rolling repetition, metadata availability and
-  upstream access cannot be guaranteed. No speaker diarization or summaries.
+  upstream access cannot be guaranteed. Speaker labeling requires explicit local
+  analysis and human review; summaries are not included.
 - Linux/macOS only in V1. Scheduled jobs need the computer awake and the appropriate
   account session/user manager running. Scheduler installation is explicit.
 - Use transcripts in accordance with applicable rights and YouTube's terms. The MIT
@@ -364,6 +453,7 @@ src/youtube_transcript_collector/
   cli.py, config.py, collector.py, database.py, models.py, retry.py, utils.py
   youtube/          # bounded discovery + both caption providers
   output/           # atomic storage, Markdown, VTT
+  speakers/         # optional local diarization, review, edits, and exports
   transcription/    # future local backend protocol only
 tests/              # deterministic offline tests
 scripts/            # scheduler renderer
@@ -373,10 +463,10 @@ docs/               # plan, decisions, validation
 
 [Architecture decisions and upstream research](docs/architecture.md) explain the
 tradeoffs. The project uses MIT; youtube-transcript-api is MIT and the yt-dlp PyPI
-package is Unlicense. Dependency licenses still apply. See [CONTRIBUTING.md](CONTRIBUTING.md)
-and [SECURITY.md](SECURITY.md).
+package is Unlicense. Dependency licenses still apply. See [CONTRIBUTING.md](CONTRIBUTING.md),
+[SECURITY.md](SECURITY.md), and [CHANGELOG.md](CHANGELOG.md).
 
 Reasonable V2 work: an opt-in faster-whisper/whisper.cpp backend after caption retry
 exhaustion, a lightweight health notification, SQLite full-text search over saved
-segments, and improved gap/backfill discovery. Diarization, embeddings, summaries,
-and a UI should remain separate optional additions.
+segments, and improved gap/backfill discovery. Embeddings, summaries,
+and a broader UI should remain separate optional additions.

@@ -1,0 +1,150 @@
+:root {
+  font: 16px/1.55 system-ui;
+  color: #152b32;
+  background: #f3f6f5;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 24px;
+}
+h1 {
+  font-size: 30px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+h2 {
+  font-size: 23px;
+}
+.eyebrow {
+  color: #137a63;
+  font-weight: 700;
+}
+section {
+  background: #fff;
+  border: 1px solid #d5dfdc;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+}
+p {
+  color: #465c63;
+}
+.names {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: 600;
+}
+input[type="text"],
+select {
+  font: inherit;
+  padding: 10px;
+  border: 1px solid #96ada6;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+button,
+a {
+  font: inherit;
+  color: #145946;
+}
+button {
+  border: 1px solid #96ada6;
+  border-radius: 6px;
+  padding: 8px 14px;
+  background: #fff;
+  cursor: pointer;
+}
+button:hover {
+  background: #e9f1ee;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+:focus-visible {
+  outline: 3px solid #137a63;
+  outline-offset: 2px;
+}
+.actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+audio {
+  width: 100%;
+}
+.cue {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 16px;
+  border-top: 1px solid #e0e7e4;
+  padding: 18px 0;
+}
+.seek {
+  align-self: start;
+  padding: 6px;
+}
+.speaker {
+  font-weight: 700;
+}
+.text {
+  margin: 5px 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.review {
+  color: #855112;
+}
+.filter {
+  flex-direction: row;
+  align-items: center;
+  margin: 16px 0;
+}
+.correct {
+  margin: 12px 0;
+}
+.correct button {
+  margin: 8px 8px 0 0;
+}
+summary {
+  cursor: pointer;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#status {
+  position: sticky;
+  top: 0;
+  background: #f3f6f5;
+  padding: 12px 0;
+  z-index: 1;
+  min-height: 1.5em;
+}
+.error {
+  color: #a12c19 !important;
+}
+@media (max-width: 500px) {
+  main {
+    padding: 0 14px;
+  }
+  section {
+    padding: 16px;
+  }
+  .cue {
+    grid-template-columns: 68px 1fr;
+    gap: 10px;
+  }
+}
