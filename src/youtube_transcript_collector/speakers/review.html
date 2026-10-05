@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Speaker review</title>
+    <link rel="stylesheet" href="/review.css" />
+    <script src="/review.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Local speaker review</p>
+      <h1 id="title">Loading transcript…</h1>
+      <p>
+        Listen to each voice, then give it a name. Names update every matching
+        entry. Automatic labels can be wrong; check interruptions and short
+        replies.
+      </p>
+      <p id="status" role="status" aria-live="polite"></p>
+      <section>
+        <h2>Speaker names</h2>
+        <p>
+          Changes save to disk when you select Save. Speaker numbers belong to
+          this analysis run.
+        </p>
+        <div class="names" id="names"></div>
+        <button id="save" disabled>Save names</button>
+      </section>
+      <section>
+        <h2>Transcript</h2>
+        <p id="stats"></p>
+        <audio id="audio" controls preload="metadata"></audio>
+        <p>
+          Select a timestamp to listen. For corrections, select one or more
+          voices and save the caption. Assigning multiple voices preserves the
+          full caption without guessing which words each person said.
+        </p>
+        <label class="filter"
+          ><input id="filter" type="checkbox" /> Show captions needing
+          review</label
+        >
+        <div id="transcript"></div>
+      </section>
+      <section>
+        <h2>Exports and audit trail</h2>
+        <p>
+          Downloads use the latest saved names and corrections. JSON includes
+          original model labels, timestamps, model hashes, and edit history.
+        </p>
+        <div class="actions">
+          <a href="/export/transcript.speakers.md" download>Download Markdown</a
+          ><a href="/export/transcript.speakers.vtt" download>Download VTT</a
+          ><a href="/export/transcript.speakers.json" download
+            >Download audit JSON</a
+          >
+        </div>
+        <details>
+          <summary>Saved edits</summary>
+          <pre id="history"></pre>
+        </details>
+      </section>
+    </main>
+  </body>
+</html>

@@ -41,6 +41,9 @@ def parser():
     doctor.add_argument(
         "--network", action="store_true", help="Also make one YouTube connectivity request"
     )
+    from .speakers.cli import register
+
+    register(commands)
     return root
 
 
@@ -77,6 +80,10 @@ def doctor(config, network):
 
 def execute(args, config):
     command = args.command or "run"
+    if command in {"diarize", "speakers"}:
+        from .speakers.cli import execute as speaker_execute
+
+        return speaker_execute(args, config)
     if command == "doctor":
         return doctor(config, args.network)
     if command == "channels":
