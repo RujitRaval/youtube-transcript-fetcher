@@ -13,7 +13,7 @@
 
 - `ruff format --check .`: passed.
 - `ruff check .`: passed.
-- `pytest -q`: **66 passed**, with socket connections blocked by the test fixture.
+- `pytest -q`: **110 passed**, with socket connections blocked by the test fixture.
 - Source distribution and wheel build: passed. Wheel has the console entry point;
   source archive includes README, example config, scheduler renderer and templates.
   Build artifacts exclude local state, transcripts and virtualenv.
@@ -46,13 +46,35 @@ that YouTube grants the same access from another network or for other videos.
 Automatic captions, English variants, preferred-language ranking, and fallback VTT
 are covered with mocked upstream responses; the live checks above used manual captions.
 
+## Speaker labeling (v0.2.0)
+
+- Installed the optional `speakers` dependencies, downloaded both pinned models,
+  verified their SHA-256 hashes, and ran the actual CPU pipeline on video
+  `SfOaZIGJ_gs` (Sam Altman x Nikhil Kamath).
+- Processed the full **2,711.011-second** audio, covering **825 captions**.
+  Inference took **256.69 seconds** on this machine. Automatic clustering produced
+  **10 voice clusters**, with **27 captions flagged for review**. These are model
+  groups, not a verified count of people; the same person can appear in multiple
+  groups. No names were inferred.
+- Browser QA on an isolated copy verified global rename, persistence after reload,
+  caption correction, the review filter, audio playback/seek, and audit JSON
+  download. The downloaded file contained both saved revisions with before/after
+  values. Test edits did not modify the user's analysis.
+- Added 44 offline tests for model integrity, alignment, immutable run publication,
+  failure recovery, optimistic edit conflicts, CLI flows, HTTP access controls,
+  audio range requests and exports. Default commands do not import audio packages.
+- `node --check` passed for the review script; the built wheel includes its HTML,
+  CSS and JavaScript resources. Audio, models, transcripts and local edits remain
+  ignored by Git.
+
 ## Not claimed as tested
 
 - No scheduler was registered, no machine reboot was performed, and no unattended
   multi-day collection was observed. launchd syntax is validated, not reboot behavior.
 - Linux execution and Python 3.11/3.13/3.14 are represented in the CI matrix but have
-  not been run locally. GitHub Actions has not been executed for this unpublished tree.
-- No local transcription implementation exists in V1.
+  not been run locally. The current branch still requires its GitHub Actions checks.
+- Audio diarization does not transcribe new words; it aligns voice labels to existing captions.
+- Speaker accuracy has not been scored against a human-labeled reference dataset.
 
 ## Reproduce
 
