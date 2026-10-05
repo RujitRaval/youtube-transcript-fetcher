@@ -2,7 +2,7 @@
 
 A small, self-hosted Python utility that watches a handful of YouTube channels and
 saves their existing captions as timestamped JSON, readable Markdown, and WebVTT.
-Install it once on a family member's computer, configure their channels, and let
+Install it on a local computer, configure the channels to follow, and let
 macOS launchd or Linux systemd invoke it roughly hourly. Each invocation exits.
 
 **The default caption collector uses local storage, with no analytics, telemetry,
@@ -128,7 +128,8 @@ On Debian/Ubuntu the distribution's `python3-venv` package may also be necessary
 The first run collects up to the recent-video limit per channel, **including existing
 recent uploads**, subject to the per-run processing limit. It does not backfill an
 entire channel. Open `transcripts/` after a successful run, then install a scheduler
-below. Your family member does not need to activate the environment or run commands.
+below. Scheduled collection runs without manually activating the environment or
+running commands.
 
 ### Optional uv installation
 
@@ -425,10 +426,11 @@ checksums. A successful forced refresh may leave an older `transcript.original.*
 file from the other provider; only files in the current manifest belong to that
 bundle. Do not edit canonical outputs if you rely on recovery validation.
 
-## macOS: launchd (recommended for your wife's Mac)
+## macOS: launchd scheduler
 
 After installation, editing config, and one successful foreground collection,
-run these as **her normal macOS account** from the project directory:
+run these as **the macOS account that will own the transcripts** from the project
+directory:
 
 ```sh
 .venv/bin/python scripts/render_scheduler.py --platform launchd --config config.yaml
@@ -443,7 +445,8 @@ launchctl print "gui/$(id -u)/com.youtube-transcript-collector"
 The renderer uses the exact virtualenv interpreter, absolute config/project/log
 paths, and XML escaping. It only writes files; it does not install anything itself.
 The LaunchAgent runs at login and roughly hourly while logged in. After a reboot,
-it resumes **when she logs in**; it does not run before login or while powered off.
+it resumes **when that account logs in**; it does not run before login or while
+powered off.
 Sleeping computers cannot collect until awake. Keep the project outside protected
 Desktop/Documents folders if macOS denies background access. With FileVault,
 normal login/unlock is required. There is no persistent Python process.
